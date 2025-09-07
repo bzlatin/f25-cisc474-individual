@@ -25,7 +25,6 @@ type SubmissionType = 'file' | 'url' | 'repo' | 'ens';
 
 export default function SubmissionsClient() {
   const params = useSearchParams();
-  const router = useRouter();
   const assignmentId = params.get('assignment');
 
   const [type, setType] = useState<SubmissionType>('file');
@@ -62,8 +61,12 @@ export default function SubmissionsClient() {
       setRepo('');
       setEnsFile(null);
       setEnsParams('');
-    } catch (e) {
-      setErr('Submission failed');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setErr(e.message || 'Submission failed');
+      } else {
+        setErr('Submission failed');
+      }
     } finally {
       setSubmitting(false);
     }
