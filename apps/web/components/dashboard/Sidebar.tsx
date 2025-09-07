@@ -17,7 +17,6 @@ import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import UploadIcon from '@mui/icons-material/Upload';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import InfoIcon from '@mui/icons-material/Info';
 
 const main = [
   { href: '/', label: 'Dashboard', icon: <HomeIcon /> },
