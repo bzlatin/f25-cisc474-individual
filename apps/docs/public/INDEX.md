@@ -22,3 +22,7 @@ If any item maps to multiple artifacts, the mapping is described inside each fil
 - Keep all files in `apps/docs/public/`.
 - Diagrams use **Mermaid** blocks so they render natively on GitHub.
 - You can copy these directly into your repo. Links above are relative and will work when committed at the same path.
+
+## Note:
+
+- This project was created with support from AI-assisted development tools to accelerate coding and design.
