@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic'; // don't SSG this page
+export const revalidate = 0; // never cache a static HTM
+
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
