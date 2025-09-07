@@ -1,24 +1,39 @@
 'use client';
 
-import { Box, Paper, Stack, Typography, Divider } from '@mui/material';
+import { Box, Stack, Typography, Divider } from '@mui/material';
 import RightPanel from '../components/dashboard/RightPanel';
+import CourseCard from '../components/CourseCard';
 
 export default function HomePage() {
+  const courses = [
+    {
+      code: 'CISC474',
+      title: 'Web Applications',
+      color: '#2563eb',
+      nextDue: 'Project Draft — Sep 15',
+    },
+    {
+      code: 'CISC361',
+      title: 'Operating Systems',
+      color: '#16a34a',
+      nextDue: 'Processes Lab — Sep 18',
+    },
+    {
+      code: 'CISC220',
+      title: 'Data Structures',
+      color: '#f59e0b',
+      nextDue: 'Sorting Assignment — Sep 20',
+    },
+  ];
+
   return (
     <Stack spacing={2}>
       <Typography variant="h4" component="h1">
         Dashboard
       </Typography>
 
-      {/* Two-column flex: left grows, right is fixed width */}
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 3,
-          alignItems: 'flex-start',
-        }}
-      >
-        {/* LEFT: course cards grid */}
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+        {/* LEFT: Course cards */}
         <Box sx={{ flex: 1 }}>
           <Box
             sx={{
@@ -31,51 +46,31 @@ export default function HomePage() {
               gap: 2,
             }}
           >
-            {['CISC474', 'CISC361', 'CISC220'].map((course, i) => (
-              <Paper
-                key={i}
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  height: 180,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  transition: 'box-shadow 0.2s',
-                  '&:hover': {
-                    boxShadow: 3,
-                  },
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight={700}>
-                  {course}
-                </Typography>
-                <Divider sx={{ my: 1 }} />
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ flex: 1 }}
-                >
-                  Next assignment due soon…
-                </Typography>
-              </Paper>
+            {courses.map((c) => (
+              <CourseCard
+                key={c.code}
+                code={c.code}
+                title={c.title}
+                color={c.color}
+                nextDue={c.nextDue}
+              />
             ))}
           </Box>
         </Box>
 
+        {/* Divider between left and right */}
         <Divider
           orientation="vertical"
           flexItem
           sx={{
             display: { xs: 'none', md: 'block' },
-            borderColor: (t) => t.palette.divider,
           }}
         />
 
+        {/* RIGHT: Sidebar */}
         <Box
           sx={{
-            width: { xs: '100%', md: 260 },
+            width: { xs: '100%', md: 320 },
             position: { md: 'sticky' },
             top: { md: 24 },
             alignSelf: 'flex-start',
