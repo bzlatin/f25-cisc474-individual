@@ -1,70 +1,85 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+'use client';
 
-type Props = Omit<ImageProps, "src"> & {
-    srcLight: string;
-    srcDark: string;
-};
+import { Box, Stack, Typography, Divider } from '@mui/material';
+import RightPanel from '../components/dashboard/RightPanel';
+import CourseCard from '../components/CourseCard';
 
-const ThemeImage = (props: Props) => {
-    const { srcLight, srcDark, ...rest } = props;
+export default function HomePage() {
+  const courses = [
+    {
+      code: 'CISC474',
+      title: 'Web Applications',
+      color: '#2563eb',
+      nextDue: 'Project Draft — Sep 15',
+    },
+    {
+      code: 'CISC361',
+      title: 'Operating Systems',
+      color: '#16a34a',
+      nextDue: 'Processes Lab — Sep 18',
+    },
+    {
+      code: 'CISC220',
+      title: 'Data Structures',
+      color: '#f59e0b',
+      nextDue: 'Sorting Assignment — Sep 20',
+    },
+  ];
 
-    return (
-        <>
-            <Image {...rest} src={srcLight} className="imgLight" />
-            <Image {...rest} src={srcDark} className="imgDark" />
-        </>
-    );
-};
+  return (
+    <Stack spacing={2}>
+      <Typography variant="h4" component="h1">
+        Dashboard
+      </Typography>
 
-export default function Home() {
-    return (
-        <div className={styles.page}>
-            <main className={styles.main}>
-                <h1>CISC474 Project Starter</h1>
-                <ol>
-                    <li>
-                        Get started by editing{" "}
-                        <code>apps/web/app/page.tsx</code>
-                    </li>
-                    <li>Save and see your changes instantly.</li>
-                </ol>
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+        {/* LEFT: Course cards */}
+        <Box sx={{ flex: 1 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: '1fr 1fr',
+                lg: '1fr 1fr 1fr',
+              },
+              gap: 2,
+            }}
+          >
+            {courses.map((c) => (
+              <CourseCard
+                key={c.code}
+                code={c.code}
+                title={c.title}
+                color={c.color}
+                nextDue={c.nextDue}
+              />
+            ))}
+          </Box>
+        </Box>
 
-                <Button appName="web" className={styles.secondary}>
-                    Open alert
-                </Button>
-            </main>
-            <footer className={styles.footer}>
-                <a
-                    href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image
-                        aria-hidden
-                        src="/window.svg"
-                        alt="Window icon"
-                        width={16}
-                        height={16}
-                    />
-                    Examples
-                </a>
-                <a
-                    href="https://turborepo.com?utm_source=create-turbo"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image
-                        aria-hidden
-                        src="/globe.svg"
-                        alt="Globe icon"
-                        width={16}
-                        height={16}
-                    />
-                    Go to turborepo.com →
-                </a>
-            </footer>
-        </div>
-    );
+        {/* Divider between left and right */}
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{
+            display: { xs: 'none', md: 'block' },
+          }}
+        />
+
+        {/* RIGHT: Sidebar */}
+        <Box
+          sx={{
+            width: { xs: '100%', md: 320 },
+            position: { md: 'sticky' },
+            top: { md: 24 },
+            alignSelf: 'flex-start',
+            pl: { md: 2 },
+          }}
+        >
+          <RightPanel />
+        </Box>
+      </Box>
+    </Stack>
+  );
 }
