@@ -7,7 +7,6 @@ flowchart TD
   Dashboard --> Courses[Courses];
   Dashboard --> Assignments[Assignments];
   Dashboard --> Gradebook[Gradebook];
-  Dashboard --> About[About];
 
   Courses --> CourseHome[Course Home];
   CourseHome --> CourseAssignments[Assignments by course];
