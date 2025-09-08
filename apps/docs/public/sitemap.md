@@ -2,32 +2,23 @@
 
 ```mermaid
 flowchart TD
-    Landing[Landing / Sign In] --> Dashboard[Dashboard]
-    Dashboard --> MyCourses[My Courses]
-    Dashboard --> Notifications[Notifications]
-    Dashboard --> Profile[Profile & Settings]
+  Landing[Landing / Sign In] --> Dashboard[Dashboard];
 
-    MyCourses --> CourseHome[Course Home]
-    CourseHome --> Modules[Modules / Resources]
-    CourseHome --> Assignments[Assignments List]
-    CourseHome --> People[People / Teams]
-    CourseHome --> Grades[Grades / Gradebook]
+  Dashboard --> Courses[Courses];
+  Dashboard --> Assignments[Assignments];
+  Dashboard --> Gradebook[Gradebook];
+  Dashboard --> About[About];
 
-    Assignments --> AssignmentDetail[Assignment Detail]
-    AssignmentDetail --> SubmitWork[Submit Work]
-    SubmitWork --> ENS[Executable Notebook
-    Submission]
-    SubmitWork --> FileUpload[File / URL / Repo]
-    AssignmentDetail --> SubHistory[Submission History]
+  Courses --> CourseHome[Course Home];
+  CourseHome --> CourseAssignments[Assignments by course];
+  CourseHome --> CourseGrades[Grades];
+  CourseHome --> Resources[Modules / Resources];
 
-    CourseHome --> Analytics[Course Analytics]:::instructor
-    CourseHome --> Manage[Course Settings]:::instructor
+  Assignments --> AssignmentDetail[Assignment Detail];
+  AssignmentDetail --> SubmitWork[Submit Work - File or URL];
+  AssignmentDetail --> SubmissionHistory[Submission History];
 
-    Admin[Admin Console]:::admin --> Users[User & Roles]:::admin
-    Admin --> Orgs[Org Settings]:::admin
-    Admin --> Integrations[Integrations]:::admin
-    Admin --> SystemHealth[System Health]:::admin
+  CourseHome --> CourseSettings[Course Settings]:::instructor;
 
-classDef admin fill:#fdd;
-classDef instructor fill:#dfd;
+  classDef instructor fill:#dfd,stroke:#9aca9a,color:#0b4210;
 ```
