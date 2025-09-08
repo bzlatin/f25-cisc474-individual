@@ -9,13 +9,13 @@
 ```mermaid
 flowchart LR
   subgraph DASHBOARD
-    A[Top Nav: logo, Courses,
-    Notifications, Profile]
-    B[Left Rail: My Courses list]
-    C[Main Panel:<br/>What's due soon<br/>Recent feedback<br/>Alerts]
+    A[Top Bar: logo, nav, profile]
+    B[Left Grid: My Courses]
+    C[Right Panel: To-Do,
+    Announcements, Feedback]
   end
+  A --> B
   A --> C
-  B --> C
 ```
 
 ---
@@ -25,17 +25,15 @@ flowchart LR
 ```mermaid
 flowchart LR
   subgraph COURSE_HOME
-    A[Top Nav]
-    B[Tabs: Overview, Modules,
-    Assignments,
-    Grades, People]
-    C[Hero: Syllabus card,
+    A[Tabs: Overview, Modules,
+    Assignments, Grades,
+    People]
+    B[Hero: Syllabus card,
     announcements]
-    D[Resources list]
+    C[Resources list]
   end
   A --> B
-  B --> C
-  B --> D
+  A --> C
 ```
 
 ---
@@ -47,11 +45,11 @@ flowchart LR
   subgraph ASSIGNMENT_DETAIL
     A[Header: Title, points,
     due/late info]
-    B[Tabs: Description, Rubric,
-    Submissions, Discussion]
+    B[Tabs: Description, Submissions,
+    Discussion]
     C[Actions: Download starter code,
     View rubric]
-    D[Submit Call-to-Action]
+    D[Primary CTA: Submit Work]
   end
   A --> B
   B --> C
@@ -60,63 +58,38 @@ flowchart LR
 
 ---
 
-## 4) Submission Modal (with ENS)
+## 4) Submission (Simple)
 
 ```mermaid
 flowchart TB
-  subgraph SUBMISSION_MODAL
-    A[Choose Type: File, URL, Repo, ENS]
-    B[If ENS: upload .ipynb/.qmd
-     or select template]
-    C[Params: dataset, seed,
-     runtime limits]
-    D[Queue job and
-    show live logs]
-    E[Results: tests passed,
-    artifacts, score, feedback]
+  subgraph SUBMISSION
+    A[Choose Type File or URL]
+    B[If File: upload dialog]
+    C[If URL: paste link]
+    D[Submit -> Confirmation:
+    Received]
   end
   A --> B
-  B --> C
-  C --> D
-  D --> E
-```
-
----
-
-## 5) Web Grader (Instructor)
-
-```mermaid
-flowchart LR
-  subgraph WEB_GRADER
-    A[Submission list / queue]
-    B[Viewer: code/notebook
-    with inline comments]
-    C[Rubric panel: criteria sliders,
-    comments]
-    D[Auto-grader results: tests,
-    logs, artifacts]
-    E[Publish grade]
-  end
-  A --> B
-  B --> C
+  A --> C
   B --> D
-  C --> E
-  D --> E
+  C --> D
 ```
 
 ---
 
-## 6) Gradebook
+## 5) Gradebook (Instructor)
 
 ```mermaid
 flowchart TB
   subgraph GRADEBOOK
-    A[Filters: section, assignment, status]
-    B[Grid: students × assignments]
-    C[Cell: score, late flag, comment icon]
-    D[Export CSV]
+    A[Filters: section, assignment]
+    B[Grid: students x assignments]
+    C[Cell: score + comment icon]
+    D[Export CSV which
+    is optional]
   end
   A --> B
   B --> C
   B --> D
+
 ```

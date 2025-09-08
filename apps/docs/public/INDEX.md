@@ -14,16 +14,14 @@ Vision: To create a flexible, user-friendly, and scalable Learning Management Sy
 3. **Wireframes (Major screens)** — [/apps/docs/public/wireframes.md](./wireframes.md)
 4. **Basic Data Model Diagram** — [/apps/docs/public/data-model.md](./data-model.md)
 
-If any item maps to multiple artifacts, the mapping is described inside each file.
-
 ---
 
-## How to Use
+## Scope Notes
 
-- Keep all files in `apps/docs/public/`.
-- Diagrams use **Mermaid** blocks so they render natively on GitHub.
-- You can copy these directly into your repo. Links above are relative and will work when committed at the same path.
+- Supported submission types: **File** and **URL**.
+- **Notebook files (`.ipynb`)** are accepted as **File** uploads and are **not executed**; the UI displays a small “Notebook” badge for visibility.
+- Advanced features (execution, auto-grading, audit logs, full WCAG conformance) are future work.
 
-## Note:
+## Note
 
-- This project was created with support from AI-assisted development tools to accelerate coding and design.
+- Portions of this project were developed with the assistance of AI tools to accelerate coding and design.
