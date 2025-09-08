@@ -2,7 +2,8 @@
 
 Vision: To create a flexible, user-friendly, and scalable Learning Management System that empowers learners, instructors, and administrators by providing a structured yet adaptable environment for managing programming problems structured around courses, assignments, submissions, and feedback. The LMS will support diverse learning needs, streamline administrative processes, and foster meaningful engagement between all roles in the system.
 
-> **Unique submission type**: **Executable Notebook Submission (ENS)** — Students submit a Jupyter/Quarto notebook that the LMS runs in a sandbox with course-provided parameters and tests. The system captures outputs (plots/tables), verifies results, and attaches structured feedback.
+> **Unique submission type**: **Notebook File Upload** — Students can submit Jupyter notebooks (`.ipynb`) as part of file uploads. The LMS stores the notebook, flags it with a “Notebook” badge in the UI, and makes it available for instructors to download and review. Notebooks are **not executed** in this prototype.
+
 
 ---
 
