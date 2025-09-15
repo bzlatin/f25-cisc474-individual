@@ -1,0 +1,4 @@
+id,assignmentId,authorId,type,storageKey,filename,contentType,url,status,late,createdAt,updatedAt
+cmflqer2z000lf9ilpspebkt4,cmflqer0u000hf9ilq45htxt1,cmflqeqhz0000f9ildwza3as6,file,,scary_numbers.pdf,application/pdf,,received,false,2025-09-15 23:04:53.147,2025-09-15 23:04:53.147
+cmflqer4y000nf9ilpdessezg,cmflqer0u000hf9ilq45htxt1,cmflqeqjs0001f9ilw67z7tnp,file,,refinement_notebook.ipynb,application/x-ipynb+json,,received,false,2025-09-15 23:04:53.218,2025-09-15 23:04:53.218
+cmflqer5o000pf9ilgj58pngl,cmflqer2a000jf9ilt7didw37,cmflqeqkg0002f9ilh0v7daw1,url,,,,https://lumon-wellness.example/irving-letter,received,false,2025-09-15 23:04:53.244,2025-09-15 23:04:53.244

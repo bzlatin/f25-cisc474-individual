@@ -1,0 +1,9 @@
+id,userId,courseId,role,section,createdAt,updatedAt
+cmflqeqxa0008f9ilvsu6rpzr,cmflqeqlw0004f9ilux6sflnh,cmflqeqne0006f9il2wszsfdq,instructor,010,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa0009f9il8mpu1ya3,cmflqeqhz0000f9ildwza3as6,cmflqeqne0006f9il2wszsfdq,learner,010,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa000af9il1sptcxtd,cmflqeqjs0001f9ilw67z7tnp,cmflqeqne0006f9il2wszsfdq,learner,010,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa000bf9ilu70mx9p6,cmflqeqkg0002f9ilh0v7daw1,cmflqeqne0006f9il2wszsfdq,learner,010,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa000cf9ilsllu2yuq,cmflqeql50003f9ilfnkc1yss,cmflqeqne0006f9il2wszsfdq,learner,010,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa000df9il9vrcl1bt,cmflqeqmm0005f9ilt25jwse9,cmflqeqth0007f9ilxm8cnm32,instructor,020,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa000ef9ilf42hvjvr,cmflqeqhz0000f9ildwza3as6,cmflqeqth0007f9ilxm8cnm32,learner,020,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
+cmflqeqxa000ff9ilqkz1z21g,cmflqeqjs0001f9ilw67z7tnp,cmflqeqth0007f9ilxm8cnm32,learner,020,2025-09-15 23:04:52.942,2025-09-15 23:04:52.942
