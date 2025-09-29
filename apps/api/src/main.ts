@@ -4,14 +4,31 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allow = new Set(['http://localhost:3001', 'http://127.0.0.1:3001']);
+  // Exact allowlist (filter out undefined)
+  const allowlist = new Set(
+    [
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+      process.env.FRONTEND_ORIGIN,
+    ].filter(Boolean) as string[],
+  );
 
   app.enableCors({
     origin: (origin, cb) => {
-      // no Origin = non-browser request → no CORS needed
-      if (!origin) return cb(null, false);
-      if (allow.has(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked: ${origin}`), false);
+      if (!origin) return cb(null, false); // non-browser/SSR requests
+
+      try {
+        const url = new URL(origin);
+        const ok =
+          allowlist.has(origin) || // exact match (prod, localhost)
+          url.host.endsWith('.vercel.app'); // allow Vercel preview deploys
+
+        return ok
+          ? cb(null, true)
+          : cb(new Error(`CORS blocked: ${origin}`), false);
+      } catch {
+        return cb(new Error('Bad Origin header'), false);
+      }
     },
     methods: ['GET', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
