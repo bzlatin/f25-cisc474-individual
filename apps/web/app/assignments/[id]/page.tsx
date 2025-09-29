@@ -1,51 +1,43 @@
 'use client';
 
-import { useMemo } from 'react';
-import Link from 'next/link';
 import { useParams, notFound } from 'next/navigation';
+import useSWR from 'swr';
+import Link from 'next/link';
 import {
   Stack,
   Typography,
   Paper,
   Divider,
   Button,
-  Tooltip,
   Chip,
+  Skeleton,
+  Box,
 } from '@mui/material';
 
-// Mock assignments (ids should match your /assignments list)
-const all = [
-  {
-    id: 'a1',
-    title: 'Sorting Algorithms',
-    course: 'CISC220',
-    due: '2025-09-14',
-    status: 'Open' as const,
-  },
-  {
-    id: 'a2',
-    title: 'Web Forms & Routing',
-    course: 'CISC474',
-    due: '2025-09-18',
-    status: 'Open' as const,
-  },
-  {
-    id: 'a3',
-    title: 'Processes & wait()',
-    course: 'CISC361',
-    due: '2025-09-20',
-    status: 'Grading' as const,
-  },
-  {
-    id: 'a4',
-    title: 'Past Project',
-    course: 'CISC220',
-    due: '2025-09-01',
-    status: 'Closed' as const,
-  },
-];
+type Assignment = {
+  id: string;
+  courseId: string;
+  title: string;
+  description?: string | null;
+  points: number;
+  dueAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
-function formatDate(d: string) {
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+const fetcher = async (id: string): Promise<Assignment | null> => {
+  const res = await fetch(`${BASE}/assignments/${id}`, {
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GET /assignments/${id} failed: ${res.status}`);
+  return res.json();
+};
+
+function formatDate(d?: string | null) {
+  if (!d) return 'N/A';
   return new Date(d).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -54,26 +46,33 @@ function formatDate(d: string) {
 }
 
 export default function AssignmentDetailPage() {
-  const params = useParams<{ id: string }>();
-  const id = params?.id;
+  const { id } = useParams<{ id: string }>();
+  const { data: a, isLoading } = useSWR(id ? `/assignments/${id}` : null, () =>
+    fetcher(id),
+  );
 
-  const a = useMemo(() => all.find((x) => x.id === id), [id]);
+  if (isLoading) {
+    return (
+      <Stack spacing={2}>
+        <Skeleton variant="text" width={220} height={36} />
+        <Skeleton variant="text" width={160} />
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Skeleton variant="text" height={28} width={140} />
+          <Skeleton variant="rounded" height={120} sx={{ mt: 1 }} />
+        </Paper>
+      </Stack>
+    );
+  }
+
   if (!a) return notFound();
 
   return (
     <Stack spacing={2}>
-      {/* Breadcrumb */}
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
         <Button component={Link} href="/assignments" variant="text">
-          ← Back
+          ← Back to assignments
         </Button>
-        <Typography variant="body2" color="text.secondary">
-          /
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {a.course}
-        </Typography>
-      </Stack>
+      </Box>
 
       {/* Title + meta */}
       <Stack direction="row" spacing={2} alignItems="center">
@@ -81,20 +80,14 @@ export default function AssignmentDetailPage() {
           {a.title}
         </Typography>
         <Chip
-          label={a.status}
-          color={
-            a.status === 'Open'
-              ? 'success'
-              : a.status === 'Grading'
-                ? 'warning'
-                : 'default'
-          }
+          label={new Date(a.dueAt || 0) > new Date() ? 'Open' : 'Closed'}
+          color={new Date(a.dueAt || 0) > new Date() ? 'success' : 'default'}
           variant="outlined"
           size="small"
         />
       </Stack>
       <Typography variant="body2" color="text.secondary">
-        {a.course} • Due {formatDate(a.due)}
+        Due {formatDate(a.dueAt)} • {a.points} pts
       </Typography>
 
       {/* Body */}
@@ -103,44 +96,12 @@ export default function AssignmentDetailPage() {
           Description
         </Typography>
         <Typography paragraph>
-          Implement the required functionality and follow submission
-          instructions. Be sure to handle edge cases and include comments where
-          appropriate.
+          {a.description || 'No description provided.'}
         </Typography>
         <Divider sx={{ my: 2 }} />
-
-        <Typography variant="h6" gutterBottom>
-          Resources
+        <Typography variant="body2" color="text.secondary">
+          Created {formatDate(a.createdAt)} • Updated {formatDate(a.updatedAt)}
         </Typography>
-        <ul>
-          <li>
-            <Link href="#">Starter code</Link>
-          </li>
-          <li>
-            <Link href="#">Rubric</Link>
-          </li>
-          <li>
-            <Link href="#">Dataset</Link>
-          </li>
-        </ul>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="h6" gutterBottom>
-          Submission
-        </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
-          Submit via the Submissions page. You can resubmit until the deadline.
-        </Typography>
-        <Tooltip title="Go to submissions">
-          <Button
-            component={Link}
-            href={`/submissions?assignment=${a.id}`}
-            variant="contained"
-          >
-            Submit Work
-          </Button>
-        </Tooltip>
       </Paper>
     </Stack>
   );

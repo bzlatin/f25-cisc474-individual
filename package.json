@@ -35,7 +35,8 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
-    "@prisma/client": "latest"
+    "@prisma/client": "latest",
+    "swr": "^2.3.6"
   },
   "packageManager": "npm@10.9.0",
   "workspaces": [

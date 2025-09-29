@@ -1,31 +1,36 @@
-'use client';
-
-import { Box, Stack, Typography, Divider } from '@mui/material';
+// apps/web/app/page.tsx
+import { Suspense } from 'react';
+import { Box, Stack, Typography, Divider, Skeleton } from '@mui/material';
 import RightPanel from '../components/dashboard/RightPanel';
-import CourseCard from '../components/CourseCard';
+import CoursesList from '../components/CoursesList';
+
+// Skeletons that match your left grid space while loading
+function CoursesFallback() {
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: '1fr 1fr',
+          lg: '1fr 1fr 1fr',
+        },
+        gap: 2,
+      }}
+    >
+      {[...Array(3)].map((_, i) => (
+        <Skeleton
+          key={i}
+          variant="rounded"
+          height={120}
+          sx={{ borderRadius: 1 }}
+        />
+      ))}
+    </Box>
+  );
+}
 
 export default function HomePage() {
-  const courses = [
-    {
-      code: 'CISC474',
-      title: 'Web Applications',
-      color: '#2563eb',
-      nextDue: 'Project Draft — Sep 15',
-    },
-    {
-      code: 'CISC361',
-      title: 'Operating Systems',
-      color: '#16a34a',
-      nextDue: 'Processes Lab — Sep 18',
-    },
-    {
-      code: 'CISC220',
-      title: 'Data Structures',
-      color: '#f59e0b',
-      nextDue: 'Sorting Assignment — Sep 20',
-    },
-  ];
-
   return (
     <Stack spacing={2}>
       <Typography variant="h4" component="h1">
@@ -46,15 +51,9 @@ export default function HomePage() {
               gap: 2,
             }}
           >
-            {courses.map((c) => (
-              <CourseCard
-                key={c.code}
-                code={c.code}
-                title={c.title}
-                color={c.color}
-                nextDue={c.nextDue}
-              />
-            ))}
+            <Suspense fallback={<CoursesFallback />}>
+              <CoursesList />
+            </Suspense>
           </Box>
         </Box>
 
@@ -62,9 +61,7 @@ export default function HomePage() {
         <Divider
           orientation="vertical"
           flexItem
-          sx={{
-            display: { xs: 'none', md: 'block' },
-          }}
+          sx={{ display: { xs: 'none', md: 'block' } }}
         />
 
         {/* RIGHT: Sidebar */}
@@ -77,7 +74,9 @@ export default function HomePage() {
             pl: { md: 2 },
           }}
         >
-          <RightPanel />
+          <Suspense fallback={<div />}>
+            <RightPanel />
+          </Suspense>
         </Box>
       </Box>
     </Stack>
