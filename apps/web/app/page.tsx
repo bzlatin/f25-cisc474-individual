@@ -74,7 +74,9 @@ export default function HomePage() {
             pl: { md: 2 },
           }}
         >
-          <RightPanel />
+          <Suspense fallback={<div />}>
+            <RightPanel />
+          </Suspense>
         </Box>
       </Box>
     </Stack>

@@ -1,6 +1,7 @@
 // components/dashboard/RightPanel.tsx
 'use client';
 
+import useSWR from 'swr';
 import {
   alpha,
   Divider,
@@ -13,32 +14,99 @@ import {
   useTheme,
 } from '@mui/material';
 
-type TodoItem = { title: string; meta: string };
-type AnnItem = { title: string; meta: string };
-type FeedbackItem = { title: string; meta: string };
+type Assignment = {
+  id: string;
+  courseId: string;
+  title: string;
+  points: number;
+  dueAt?: string | null;
+  createdAt: string;
+};
 
-export default function RightPanel({
-  todos = [
-    { title: 'Learning NextJS', meta: 'Sep 11 • CISC474' },
-    { title: 'PLimited Direct Execution', meta: 'Sep 12 • CISC361' },
-    { title: 'Resume Revisions 1', meta: 'Sep 14 • CISC498' },
-  ],
-  announcements = [
-    { title: 'No Class 09/05', meta: 'CISC498' },
-    { title: 'End of the Second Week…', meta: 'CISC361' },
-    { title: '[ASSIGNMENT] Deadline…', meta: 'CISC361' },
-  ],
-  feedback = [
-    { title: 'Create a Website', meta: 'CISC474 • “Great job!”' },
-    { title: 'P:Processes', meta: 'CISC361 • 5/5' },
-    { title: 'Book Reading: Ch. 1 & 2', meta: 'CISC361 • 5/5' },
-  ],
-}: {
-  todos?: TodoItem[];
-  announcements?: AnnItem[];
-  feedback?: FeedbackItem[];
-}) {
+type Score = {
+  id: string;
+  submissionId: string;
+  points: number;
+  comment?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Feedback = {
+  id: string;
+  submissionId: string;
+  authorId: string;
+  body: string;
+  createdAt: string;
+};
+
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+
+const fetchJSON = <T,>(path: string) =>
+  fetch(`${BASE}${path}`, {
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+  }).then((r) => {
+    if (!r.ok) throw new Error(`${path} -> ${r.status}`);
+    return r.json() as Promise<T>;
+  });
+
+export default function RightPanel() {
   const theme = useTheme();
+
+  const { data: assignments = [] } = useSWR<Assignment[]>(
+    '/assignments',
+    () => fetchJSON<Assignment[]>('/assignments'),
+    { suspense: true, fallbackData: [], revalidateOnFocus: false },
+  );
+
+  const { data: scores = [] } = useSWR<Score[]>(
+    '/scores',
+    () => fetchJSON<Score[]>('/scores'),
+    { suspense: true, fallbackData: [], revalidateOnFocus: false },
+  );
+
+  const { data: feedbackRaw = [] } = useSWR<Feedback[]>(
+    '/feedback',
+    () => fetchJSON<Feedback[]>('/feedback'),
+    { suspense: true, fallbackData: [], revalidateOnFocus: false },
+  );
+
+  // Map data to display items
+  const todos = [...assignments]
+    .sort(
+      (a, b) =>
+        new Date(a.dueAt ?? 0).getTime() - new Date(b.dueAt ?? 0).getTime(),
+    )
+    .slice(0, 5)
+    .map((a) => ({
+      title: a.title,
+      meta: a.dueAt
+        ? `${new Date(a.dueAt).toLocaleDateString()} • ${a.points} pts`
+        : `${a.points} pts • No due date`,
+    }));
+
+  const grades = [...scores]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5)
+    .map((s) => ({
+      title: `${s.points} pts${s.comment ? ` • ${s.comment}` : ''}`,
+      meta: new Date(s.createdAt).toLocaleDateString(),
+    }));
+
+  const feedback = [...feedbackRaw]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5)
+    .map((f) => ({
+      title: f.body.length > 300 ? f.body.slice(0, 300) + '…' : f.body,
+      meta: new Date(f.createdAt).toLocaleDateString(),
+    }));
 
   const cardSx = {
     p: 2,
@@ -58,7 +126,6 @@ export default function RightPanel({
     alignItems: 'flex-start',
     px: 0.5,
     py: 0.5,
-    // Make sure long text wraps instead of being cut off:
     '& .MuiListItemText-root': {
       m: 0,
       wordBreak: 'break-word',
@@ -81,7 +148,7 @@ export default function RightPanel({
 
   return (
     <Stack spacing={2}>
-      {/* To Do */}
+      {/* To Do (from /assignments) */}
       <Paper variant="outlined" sx={cardSx}>
         <Typography variant="subtitle1" sx={titleSx}>
           To Do
@@ -98,30 +165,48 @@ export default function RightPanel({
               />
             </ListItem>
           ))}
+          {todos.length === 0 && (
+            <ListItem disableGutters sx={listItemSx}>
+              <ListItemText
+                primary="Nothing due yet."
+                secondary=""
+                primaryTypographyProps={{ variant: 'body2' }}
+              />
+            </ListItem>
+          )}
         </List>
       </Paper>
 
-      {/* Announcements */}
+      {/* Recent Grades (from /scores) */}
       <Paper variant="outlined" sx={cardSx}>
         <Typography variant="subtitle1" sx={titleSx}>
-          Announcements
+          Recent Grades
         </Typography>
         <Divider sx={{ my: 1 }} />
         <List dense disablePadding>
-          {announcements.map((a, i) => (
+          {grades.map((g, i) => (
             <ListItem key={i} disableGutters sx={listItemSx}>
               <ListItemText
-                primary={a.title}
-                secondary={a.meta}
+                primary={g.title}
+                secondary={g.meta}
                 primaryTypographyProps={{ variant: 'body2' }}
                 secondaryTypographyProps={{ variant: 'caption' }}
               />
             </ListItem>
           ))}
+          {grades.length === 0 && (
+            <ListItem disableGutters sx={listItemSx}>
+              <ListItemText
+                primary="No grades yet."
+                secondary=""
+                primaryTypographyProps={{ variant: 'body2' }}
+              />
+            </ListItem>
+          )}
         </List>
       </Paper>
 
-      {/* Recent Feedback */}
+      {/* Recent Feedback (from /feedback) */}
       <Paper variant="outlined" sx={cardSx}>
         <Typography variant="subtitle1" sx={titleSx}>
           Recent Feedback
@@ -138,6 +223,15 @@ export default function RightPanel({
               />
             </ListItem>
           ))}
+          {feedback.length === 0 && (
+            <ListItem disableGutters sx={listItemSx}>
+              <ListItemText
+                primary="No feedback yet."
+                secondary=""
+                primaryTypographyProps={{ variant: 'body2' }}
+              />
+            </ListItem>
+          )}
         </List>
       </Paper>
     </Stack>
