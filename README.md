@@ -118,7 +118,7 @@ This repository is my version of the tasks we've finished in this class so far. 
 git remote add upstream https://github.com/UD-CISC474-F25/individual-project-starter.git
 git fetch upstream
 git checkout main
-get merge upstream/main
+git merge upstream/main
 ```
 
 2. I modified a few files, and you can look over this PR to see what they are. You might get conflicts if you are doing more complicated things. Eventually, you should end up with a new `apps/web-start` folder, and you should also see that the `apps/web/package.json` and `apps/docs/package.json` files have been modified (to disable them from running when you use `npm run dev`).
