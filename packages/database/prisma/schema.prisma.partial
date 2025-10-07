@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+model User {
+  id                String            @id @default(cuid())
+  name              String?
+  email             String?           @unique
+  emailVerified     DateTime?
+  authentications   Authentication[]
+  owned_assignments Assignment[]
+  owned_submissions Submission[]
+  owned_courses     Course[]
+  AssignmentGroup   AssignmentGroup[]
+}
+
+model Authentication {
+  id         String @id @default(cuid())
+  userId     String
+  provider   String
+  providerId String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+}
+
+model Course {
+  id              String            @id @default(cuid())
+  name            String
+  description     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  owner           User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId         String
+  assignments     Assignment[]
+  submissions     Submission[]
+  AssignmentGroup AssignmentGroup[]
+}
+
+model Assignment {
+  id          String            @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  owner       User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  course      Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String
+  submissions Submission[]
+  groups      AssignmentGroup[]
+}
+
+model AssignmentGroup {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String
+  assignments Assignment[]
+}
+
+model Submission {
+  id           String     @id @default(cuid())
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId     String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}

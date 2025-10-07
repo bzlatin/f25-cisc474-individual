@@ -1,0 +1,371 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/client"
+}
+
+// ---------- Enums (extend with any additional values you use) ----------
+enum AssignmentStatus {
+    DRAFT
+    PUBLISHED
+}
+
+enum AssignmentTypes {
+    READING
+}
+
+// add more…
+enum AssignmentGroupCategory {
+    NONE
+}
+
+// add more…
+enum AuthenticationType {
+    LOCAL
+}
+
+// add more…
+enum CourseKind {
+    DEFAULT
+}
+
+// add more…
+enum CourseService {
+    NATIVE
+}
+
+// add more…
+enum CourseVisibility {
+    PRIVATE
+}
+
+// add more…
+enum ReviewCommentFormat {
+    MARKDOWN
+}
+
+// add more…
+enum ReviewStatus {
+    DRAFT
+}
+
+// add more…
+enum SubmissionStatuses {
+    STARTED
+}
+
+// add more…
+enum GradingStatuses {
+    NOT_READY
+}
+
+// add more…
+enum UserRoles {
+    LEARNER
+}
+
+// add more…
+enum InviteKind {
+    COURSE_INVITE
+}
+
+// add more…
+enum InviteStatus {
+    PENDING
+}
+
+// add more…
+
+// ---------- Models ----------
+model Assignment {
+    id     Int              @id @default(autoincrement())
+    name   String           @default("")
+    url    String? // originally default=make_flavored_uuid_generator('assignment')
+    status AssignmentStatus @default(DRAFT)
+
+    // Settings
+    type         AssignmentTypes @default(READING)
+    instructions String          @default("")
+    reviewed     Boolean         @default(false)
+    hidden       Boolean         @default(false)
+    public       Boolean         @default(false)
+    subordinate  Boolean         @default(false)
+    ip_ranges    String          @default("")
+    points       Int             @default(1)
+    settings     String?
+
+    // Code columns
+    on_run                 String @default("")
+    on_change              String @default("")
+    on_eval                String @default("")
+    starting_code          String @default("")
+    extra_instructor_files String @default("")
+    extra_starting_files   String @default("")
+
+    // Tracking
+    forked_id      Int?
+    forked_version Int?
+    owner_id       Int
+    course_id      Int
+    version        Int  @default(0)
+
+    // Relations
+    forked Assignment?  @relation("AssignmentFork", fields: [forked_id], references: [id])
+    forks  Assignment[] @relation("AssignmentFork")
+    owner  User         @relation(fields: [owner_id], references: [id])
+    course Course       @relation(fields: [course_id], references: [id])
+
+    submissions Submission[]
+    memberships AssignmentGroupMembership[]
+    ownerId     Int?
+
+    @@index([url], name: "assignment_url_index")
+    @@index([course_id], name: "assignment_course_index")
+}
+
+model AssignmentGroup {
+    id             Int                     @id @default(autoincrement())
+    name           String                  @default("Untitled")
+    url            String? // default=make_flavored_uuid_generator("group")
+    forked_id      Int?
+    category       AssignmentGroupCategory @default(NONE)
+    forked_version Int?
+    owner_id       Int
+    course_id      Int
+    position       Int                     @default(0)
+    version        Int                     @default(0)
+
+    forked AssignmentGroup?  @relation("AssignmentGroupFork", fields: [forked_id], references: [id])
+    forks  AssignmentGroup[] @relation("AssignmentGroupFork")
+    owner  User              @relation(fields: [owner_id], references: [id])
+    course Course            @relation(fields: [course_id], references: [id])
+
+    memberships AssignmentGroupMembership[]
+    submissions Submission[]
+
+    @@index([url], name: "assignment_group_url_index")
+    @@index([course_id], name: "assignment_group_course_index")
+}
+
+model AssignmentGroupMembership {
+    id                  Int     @id @default(autoincrement())
+    assignment_group_id Int
+    assignment_id       Int
+    position            Int?
+    policy              String? @default("{}")
+
+    assignment_group AssignmentGroup @relation(fields: [assignment_group_id], references: [id])
+    assignment       Assignment      @relation(fields: [assignment_id], references: [id])
+
+    @@index([assignment_group_id, assignment_id], name: "assignment_group_membership_lookup")
+    @@index([assignment_id], name: "assignment_group_membership_assignment_id")
+    @@index([assignment_group_id], name: "assignment_group_membership_assignment_group_id")
+}
+
+model Authentication {
+    id            Int                @id @default(autoincrement())
+    type          AuthenticationType @default(LOCAL)
+    value         String
+    user_id       Int
+    expires_at    DateTime?
+    refresh_token String?
+
+    user User @relation(fields: [user_id], references: [id])
+
+    @@index([user_id], name: "authentication_user_index")
+}
+
+model Course {
+    id       Int     @id @default(autoincrement())
+    name     String
+    url      String? // default=make_flavored_uuid_generator("course")
+    owner_id Int
+
+    kind        CourseKind    @default(DEFAULT)
+    service     CourseService @default(NATIVE)
+    external_id String        @default("")
+    lms_id      Int?
+    endpoint    String        @default("")
+    version     Int           @default(0)
+
+    visibility CourseVisibility @default(PRIVATE)
+    term       String           @default("")
+    settings   String           @default("")
+    locked     Boolean          @default(false)
+
+    owner             User              @relation(fields: [owner_id], references: [id])
+    roles             Role[]
+    assignments       Assignment[]
+    assignment_groups AssignmentGroup[]
+    submissions       Submission[]
+    invites           Invite[]
+    reviews           Review[]          @ignore // not directly linked in SQLAlchemy; present for potential future use
+
+    // logs, tags, reports not modeled (missing types)
+
+    @@index([url], name: "course_url_index")
+}
+
+model GradeHistory {
+    id             Int      @id @default(autoincrement())
+    submission_id  Int
+    grader_id      Int
+    score          Float
+    date_submitted DateTime // default=utcnow() — set in app/db layer
+
+    submission Submission @relation(fields: [submission_id], references: [id])
+    grader     User       @relation(fields: [grader_id], references: [id])
+
+    @@index([submission_id], name: "grade_history_submission_id_index")
+}
+
+model Invite {
+    id          Int          @id @default(autoincrement())
+    url         String // default=make_flavored_uuid_generator("invite")
+    user_id     Int?
+    course_id   Int
+    role        UserRoles?   @default(LEARNER)
+    expires     DateTime?
+    kind        InviteKind   @default(COURSE_INVITE)
+    status      InviteStatus @default(PENDING)
+    approver_id Int?
+
+    course   Course @relation(fields: [course_id], references: [id])
+    user     User?  @relation("InviteUser", fields: [user_id], references: [id])
+    approver User?  @relation("InviteApprover", fields: [approver_id], references: [id])
+
+    @@index([url], name: "invite_url_index")
+    @@index([course_id], name: "invite_course_index")
+    @@index([user_id], name: "invite_user_index")
+}
+
+model Review {
+    id             Int                 @id @default(autoincrement())
+    comment        String              @default("")
+    comment_format ReviewCommentFormat @default(MARKDOWN)
+    location       String              @default("")
+    generic        Boolean             @default(false)
+    tag_id         Int? // FK to AssignmentTag (model not provided)
+    status         ReviewStatus        @default(DRAFT)
+    extra_data     String              @default("")
+    score          Int?
+    version        Int                 @default(0)
+
+    replaces           Int? // self-ref; separate from forked
+    submission_id      Int?
+    author_id          Int
+    assignment_version Int     @default(0)
+    submission_version Int     @default(0)
+    tool               String?
+    forked_id          Int?
+    forked_version     Int?
+
+    submission Submission? @relation(fields: [submission_id], references: [id])
+    author     User        @relation(fields: [author_id], references: [id])
+
+    // two distinct self-relations
+    replaces_review Review?  @relation("ReviewReplaces", fields: [replaces], references: [id])
+    replaced_by     Review[] @relation("ReviewReplaces")
+    forked          Review?  @relation("ReviewFork", fields: [forked_id], references: [id])
+    forks           Review[] @relation("ReviewFork")
+    Course          Course?  @relation(fields: [courseId], references: [id])
+    courseId        Int?
+    User            User?    @relation(fields: [userId], references: [id])
+    userId          Int?
+    User            User?    @relation(fields: [userId], references: [id])
+
+    @@index([submission_id], name: "review_submission_index")
+}
+
+model Role {
+    id          Int       @id @default(autoincrement())
+    name        UserRoles @default(LEARNER)
+    subname     String    @default("")
+    user_id     Int
+    course_id   Int?
+    external_id Int?
+    description String?
+
+    user   User    @relation(fields: [user_id], references: [id])
+    course Course? @relation(fields: [course_id], references: [id])
+
+    @@index([user_id], name: "role_user_id")
+    @@index([course_id], name: "role_course_id")
+}
+
+model Submission {
+    id                Int                @id @default(autoincrement())
+    code              String             @default("")
+    extra_files       String             @default("")
+    url               String             @unique @default(cuid()) // original: make_flavored_uuid_generator("submission_url")
+    endpoint          String             @default("")
+    score             Int                @default(0)
+    correct           Boolean            @default(false)
+    submission_status SubmissionStatuses @default(STARTED)
+    grading_status    GradingStatuses    @default(NOT_READY)
+    feedback          String             @default("")
+    time_limit        String?
+
+    date_started   DateTime?
+    date_submitted DateTime?
+    date_graded    DateTime?
+    date_due       DateTime?
+    date_locked    DateTime?
+
+    assignment_id       Int
+    assignment_group_id Int?
+    course_id           Int
+    user_id             Int
+    assignment_version  Int  @default(0)
+    version             Int  @default(0)
+
+    assignment       Assignment       @relation(fields: [assignment_id], references: [id])
+    assignment_group AssignmentGroup? @relation(fields: [assignment_group_id], references: [id])
+    course           Course           @relation(fields: [course_id], references: [id])
+    user             User             @relation(fields: [user_id], references: [id])
+    reviews          Review[]
+    grade_history    GradeHistory[]
+
+    @@index([course_id, assignment_id, user_id], name: "submission_index")
+    @@index([assignment_id], name: "submission_assignment_index")
+    @@index([user_id], name: "submission_user_index")
+    @@index([url], name: "submission_url_index")
+}
+
+model User {
+    id           Int       @id @default(autoincrement())
+    first_name   String
+    last_name    String
+    email        String
+    proof        String    @default("")
+    password     String
+    active       Boolean?
+    anonymous    Boolean   @default(false)
+    confirmed_at DateTime?
+    banned       Boolean   @default(false)
+
+    fs_uniquifier String @unique
+
+    roles             Role[]
+    authentications   Authentication[]
+    assignments       Assignment[]      @relation("UserToAssignments") // owner
+    assignment_groups AssignmentGroup[]
+    courses           Course[]
+    submissions       Submission[]
+    reviews           Review[]          @relation("UserToReviews")
+    invites           Invite[]          @relation("InviteUser")
+    approvals         Invite[]          @relation("InviteApprover")
+    grade_history     GradeHistory[] // as grader
+
+    // logs, tags, reports not modeled (missing types)
+    Assignment Assignment[]
+    Review     Review[]
+}

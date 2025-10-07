@@ -73,6 +73,9 @@ Then, you can make the first push of your initial database setup: `npx prisma db
 
 Then you can populate the database with an initial row by using: `npx prisma db seed`
 
+- Run studio: `npx prisma studio`
+- Validate prisma: `npx prisma validate`
+
 ---
 
 ## What's inside?
@@ -100,3 +103,58 @@ This Turborepo has some additional tools already setup for you:
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
+
+## Changes on October 5, 2025
+
+I've gone through and made some changes to the frontend, mostly to move us away from Next.js to Tanstack Start/Router. The new frontend is in `apps/web-start`, and the old one is still in `apps/web`. The scripts in `apps/web` and `apps/docs` have been disabled so that they don't run when you do `npm run dev` from the top-level. You might want to delete them, just so you don't get confused, but I figured some folks might still have some code they want to quickly reference in them.
+
+This repository is my version of the tasks we've finished in this class so far. It has a bunch of tables for users, courses, assignments, and submissions. The backend has been modified to allow CORS from the frontend, and the frontend has been modified to use React Query to fetch data from the backend. The frontend is very bare-bones right now, but it does show a list of courses fetched from the backend. If you'd like to see what I've changed from the original repo, you can look at the commits and files changed in this [pull request](https://github.com/UD-CISC474-F25/individual-project-starter/pull/21/files).
+
+### Getting the new frontend working
+
+1. First, pull my changes from upstream. You can try to do this from the GitHub UI, but I recommend adding my original repo as an upstream and then merging that upstream remote into your branch. It'll look something like this:
+
+```console
+git remote add upstream https://github.com/UD-CISC474-F25/individual-project-starter.git
+git fetch upstream
+git checkout main
+get merge upstream/main
+```
+
+2. I modified a few files, and you can look over this PR to see what they are. You might get conflicts if you are doing more complicated things. Eventually, you should end up with a new `apps/web-start` folder, and you should also see that the `apps/web/package.json` and `apps/docs/package.json` files have been modified (to disable them from running when you use `npm run dev`).
+3. You'll need to `cd apps/web-start` and run `npm install` to actually install the dependencies; you might be able to make it work from the top-level, but it didn't for me.
+   1. You might also need to `cd packages/api` and run `npm install` to get the shared DTOs working.
+4. Now when you run `npm run dev` the first time, Vite will create a necessary file (`apps/web-start/src/routeTree.gen.ts`).
+5. Install Tanstack/React Query Devtools extension. You can get links to the extension for your browser here: https://tanstack.com/query/latest/docs/framework/react/devtools (note that you do not need to follow the rest of those instructions)
+6. You might need to modify your `.env` file in `apps/web-start` to have the following content:
+
+```
+VITE_BACKEND_URL="http://localhost:3000"
+```
+
+7. Now you will need to port over your frontend, or at least as much of it as you want. For more information about TanStack Start's routing, see: <https://tanstack.com/start/latest/docs/framework/react/routing>
+8. You can use the `backendFetcher` function in `./integrations/fetcher.ts` to fetch data from the backend. It uses the `VITE_BACKEND_URL` environment variable to determine where to send requests. For more information about Tanstack/React Query, see: <https://tanstack.com/query/latest/docs/framework/react/guides/queries>
+
+### Deploying
+
+Once you are ready to deploy, you can use Cloudflare Workers for the frontend. The backend can still be deployed on Render.
+
+1. Go to Cloudflare Workers: https://workers.cloudflare.com/
+2. Sign up for a new account with Github.
+3. Click "Get Started" next to "Import a Repository"
+4. Select Github
+   4.1. Authorize the application
+   4.2. Install it on your personal account
+   4.3. Choose "Only select repositories" and find the 474 repo we are using this semester.
+   4.4. Install
+5. For a second time, click "Get Started" next to "Import a Repository"
+6. Choose the 474 repo from the list
+7. Choose an appropriate name for your Repository.
+8. Change the deploy command to the following: `npx wrangler deploy -c apps/web-start/dist/server/wrangler.json`
+9. Click the Okay button at the bottom.
+10. The site should deploy; you can use the box with a diagonal arrow to preview the site ("Preview the worker"). You can find this button with no label in the top-right corner.
+11. You will also need to add a new VITE_BACKEND_URL environment variable to your **Build** Variables and Secrets (not just the runtime Variables and Secrets), or whatever you choose to use for giving the backend url to the frontend.
+
+I had an error with my Render deploy, but this was fixed after I emptied the cache and redeployed. Make sure you update your backend's secrets to include the new origin URL for your frontend.
+
+You are free to shut down your Vercel frontend. We won't need it anymore.

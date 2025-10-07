@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+<<<<<<< HEAD
 import { PrismaModule } from './prisma/prisma.module';
 
 import { UsersModule } from './users/users.module';
@@ -26,6 +27,18 @@ import { AppService } from './app.service';
     FeedbackModule,
     LinksModule,
   ],
+=======
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
+import { UsersModule } from './users/users.module';
+import { CoursesModule } from './courses/courses.module';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { GroupsModule } from './groups/groups.module';
+import { SubmissionsModule } from './submissions/submissions.module';
+
+@Module({
+  imports: [UsersModule, CoursesModule, AssignmentsModule, GroupsModule, SubmissionsModule],
+>>>>>>> upstream/main
   controllers: [AppController],
   providers: [AppService],
 })

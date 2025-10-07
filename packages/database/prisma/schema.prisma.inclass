@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/client"
+}
+
+model User {
+    id            String       @id @default(uuid())
+    name          String?
+    email         String?      @unique
+    emailVerified DateTime?
+    courses       Course[]
+    assignments   Assignment[]
+    Submission    Submission[]
+
+    @@index([email])
+}
+
+model Course {
+    id          String                 @id @default(uuid())
+    name        String
+    description String?
+    createdAt   DateTime               @default(now())
+    updatedAt   DateTime               @updatedAt
+    owner       User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId     String
+    memberships AssignmentMembership[]
+    Submission  Submission[]
+}
+
+model Assignment {
+    id          String                 @id @default(uuid())
+    title       String
+    body        String
+    owner       User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId     String
+    memberships AssignmentMembership[]
+    Submission  Submission[]
+}
+
+model AssignmentMembership {
+    id           String     @id @default(uuid())
+    course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    courseId     String
+    assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+    assignmentId String
+    position     Int
+}
+
+model Submission {
+    id           String     @id @default(uuid())
+    content      String
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+    assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+    assignmentId String
+    student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    studentId    String
+    course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    courseId     String
+
+    @@unique([courseId, assignmentId, studentId])
+}
