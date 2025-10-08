@@ -40,7 +40,7 @@ type Feedback = {
   createdAt: string;
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+const BASE = process.env.VITE_BACKEND_URL!;
 
 const fetchJSON = <T,>(path: string) =>
   fetch(`${BASE}${path}`, {

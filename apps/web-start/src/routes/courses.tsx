@@ -1,23 +1,38 @@
-import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { backendFetcher } from '../integrations/fetcher';
+import { Suspense } from 'react';
+import { Stack, Typography, Skeleton } from '@mui/material';
+import CoursesList from '../components/CoursesList';
 
 export const Route = createFileRoute('/courses')({
-  component: RouteComponent,
+  component: CoursesPage,
 });
 
-function RouteComponent() {
-  const { data, refetch, error, isFetching } = useQuery({
-    queryKey: ['courses'],
-    queryFn: backendFetcher('/courses'),
-    initialData: [],
-  });
+function ListFallback() {
+  return (
+    <Stack spacing={2}>
+      {[...Array(3)].map((_, i) => (
+        <Stack key={i} spacing={1}>
+          <Skeleton variant="text" width={160} height={28} />
+          <Skeleton variant="rounded" height={80} />
+        </Stack>
+      ))}
+    </Stack>
+  );
+}
 
-  if (isFetching) return <div>Loading...</div>;
+function CoursesPage() {
+  return (
+    <Stack spacing={2}>
+      <Typography variant="h4" component="h1">
+        Courses
+      </Typography>
+      <Typography variant="body1">
+        Your enrolled courses will appear here.
+      </Typography>
 
-  if (error) {
-    return <div>Error: {(error as Error).message}</div>;
-  }
-
-  return <div>Courses: {JSON.stringify(data)}</div>;
+      <Suspense fallback={<ListFallback />}>
+        <CoursesList />
+      </Suspense>
+    </Stack>
+  );
 }

@@ -25,7 +25,7 @@ type Assignment = {
   updatedAt: string;
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+const BASE = process.env.VITE_BACKEND_URL!;
 const fetcher = async (id: string): Promise<Assignment | null> => {
   const res = await fetch(`${BASE}/assignments/${id}`, {
     cache: 'no-store',

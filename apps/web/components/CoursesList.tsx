@@ -11,7 +11,7 @@ type Course = {
   description?: string | null;
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+const BASE = process.env.VITE_BACKEND_URL!;
 const fetcher = async (): Promise<Course[]> => {
   const res = await fetch(`${BASE}/courses`, {
     cache: 'no-store',
