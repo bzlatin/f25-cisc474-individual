@@ -1,4 +1,4 @@
-import { IconButton, Tooltip, Avatar, Stack } from '@mui/material';
+import { Avatar, IconButton, Stack, Tooltip } from '@mui/material';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 

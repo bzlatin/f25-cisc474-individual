@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
-import CourseCard from './CourseCard';
 import { fetchJSON } from '../lib/api';
+import CourseCard from './CourseCard';
 
 type Course = {
   id: string;
@@ -12,7 +12,7 @@ type Course = {
 export default function CoursesList() {
   const { data: courses = [] } = useSuspenseQuery({
     queryKey: ['courses'],
-    queryFn: () => fetchJSON<Course[]>('/courses'),
+    queryFn: () => fetchJSON<Array<Course>>('/courses'),
     staleTime: 60_000,
   });
 

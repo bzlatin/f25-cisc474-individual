@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Paper, Stack, Typography, Button, Chip, Divider } from '@mui/material';
+import { Button, Chip, Divider, Paper, Stack, Typography } from '@mui/material';
 import { fetchJSON } from '../lib/api';
 
 type Assignment = {
@@ -17,7 +17,7 @@ type Assignment = {
 export default function AssignmentsList() {
   const { data: assignments = [] } = useSuspenseQuery({
     queryKey: ['assignments'],
-    queryFn: () => fetchJSON<Assignment[]>('/assignments'),
+    queryFn: () => fetchJSON<Array<Assignment>>('/assignments'),
     staleTime: 60_000,
   });
 

@@ -1,9 +1,10 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 import { makeTheme } from '../theme';
 import Shell from './dashboard/Shell';
 import Sidebar from './dashboard/Sidebar';
 import TopbarRight from './dashboard/TopbarRight';
+import type { ReactNode } from 'react';
 
 export default function AppProviders({ children }: { children: ReactNode }) {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');

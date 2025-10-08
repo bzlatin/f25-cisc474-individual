@@ -1,12 +1,6 @@
 import { Suspense } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import {
-  Box,
-  Stack,
-  Typography,
-  Divider,
-  Skeleton,
-} from '@mui/material';
+import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import CoursesList from '../components/CoursesList';
 import RightPanel from '../components/dashboard/RightPanel';
 

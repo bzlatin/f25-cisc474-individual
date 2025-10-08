@@ -1,20 +1,20 @@
 import { useMemo, useState } from 'react';
 import {
-  Stack,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  MenuItem,
   Alert,
-  Snackbar,
-  Tooltip,
+  Button,
   FormHelperText,
   InputAdornment,
+  MenuItem,
+  Paper,
+  Snackbar,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import LinkIcon from '@mui/icons-material/Link';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import LinkIcon from '@mui/icons-material/Link';
 import ScienceIcon from '@mui/icons-material/Science';
 
 type SubmissionType = 'file' | 'url' | 'repo' | 'ens';

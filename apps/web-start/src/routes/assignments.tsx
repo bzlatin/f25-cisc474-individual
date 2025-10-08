@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Stack, Typography, Skeleton } from '@mui/material';
+import { Skeleton, Stack, Typography } from '@mui/material';
 import AssignmentsList from '../components/AssignmentsList';
 
 export const Route = createFileRoute('/assignments')({

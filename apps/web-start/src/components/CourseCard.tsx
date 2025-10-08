@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, Divider, Stack } from '@mui/material';
+import { Box, Divider, Paper, Stack, Typography } from '@mui/material';
 
 type CourseCardProps = {
   code: string;

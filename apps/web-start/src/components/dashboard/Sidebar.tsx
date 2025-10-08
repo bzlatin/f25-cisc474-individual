@@ -8,11 +8,12 @@ import {
   ListItemText,
   ListSubheader,
 } from '@mui/material';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import HomeIcon from '@mui/icons-material/Home';
 import SchoolIcon from '@mui/icons-material/School';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import UploadIcon from '@mui/icons-material/Upload';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import UploadIcon from '@mui/icons-material/Upload';
+import type { ReactNode } from 'react';
 
 const main = [
   { to: '/', label: 'Dashboard', icon: <HomeIcon /> },
@@ -31,7 +32,7 @@ export default function Sidebar() {
   });
 
   const renderSection = (
-    items: { to: string; label: string; icon: React.ReactNode }[],
+    items: Array<{ to: string; label: string; icon: ReactNode }>,
     title?: string,
   ) => (
     <List

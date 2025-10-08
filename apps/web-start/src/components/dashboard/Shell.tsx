@@ -1,16 +1,17 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
 import {
   AppBar,
-  Toolbar,
-  IconButton,
-  Drawer,
   Box,
   CssBaseline,
-  useMediaQuery,
-  type Theme,
+  Drawer,
+  IconButton,
+  Toolbar,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import type { Theme } from '@mui/material';
+import type { ReactNode } from 'react';
 
 const DRAWER_WIDTH = 260;
 

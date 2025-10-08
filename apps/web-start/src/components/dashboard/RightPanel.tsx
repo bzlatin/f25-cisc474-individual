@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import {
-  alpha,
   Divider,
   List,
   ListItem,
@@ -8,11 +7,11 @@ import {
   Paper,
   Stack,
   Typography,
+  alpha,
   useTheme,
-  type SxProps,
-  type Theme,
 } from '@mui/material';
 import { fetchJSON } from '../../lib/api';
+import type { SxProps, Theme } from '@mui/material';
 
 type Assignment = {
   id: string;
@@ -45,19 +44,19 @@ export default function RightPanel() {
 
   const { data: assignments = [] } = useSuspenseQuery({
     queryKey: ['assignments'],
-    queryFn: () => fetchJSON<Assignment[]>('/assignments'),
+    queryFn: () => fetchJSON<Array<Assignment>>('/assignments'),
     staleTime: 60_000,
   });
 
   const { data: scores = [] } = useSuspenseQuery({
     queryKey: ['scores'],
-    queryFn: () => fetchJSON<Score[]>('/scores'),
+    queryFn: () => fetchJSON<Array<Score>>('/scores'),
     staleTime: 60_000,
   });
 
   const { data: feedback = [] } = useSuspenseQuery({
     queryKey: ['feedback'],
-    queryFn: () => fetchJSON<Feedback[]>('/feedback'),
+    queryFn: () => fetchJSON<Array<Feedback>>('/feedback'),
     staleTime: 60_000,
   });
 
@@ -135,7 +134,12 @@ export default function RightPanel() {
 
   return (
     <Stack spacing={2}>
-      <PanelCard title="To Do" items={todos} cardSx={cardSx} listItemSx={listItemSx} />
+      <PanelCard
+        title="To Do"
+        items={todos}
+        cardSx={cardSx}
+        listItemSx={listItemSx}
+      />
       <PanelCard
         title="Recent Grades"
         items={grades}
@@ -162,14 +166,17 @@ function PanelCard({
   listItemSx,
 }: {
   title: string;
-  items: { title: string; meta?: string }[];
+  items: Array<{ title: string; meta?: string }>;
   emptyLabel?: string;
   cardSx: SxProps<Theme>;
   listItemSx: SxProps<Theme>;
 }) {
   return (
     <Paper variant="outlined" sx={cardSx}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 800, letterSpacing: 0.2 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{ fontWeight: 800, letterSpacing: 0.2 }}
+      >
         {title}
       </Typography>
       <Divider sx={{ my: 1 }} />

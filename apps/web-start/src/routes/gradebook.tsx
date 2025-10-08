@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import {
-  Typography,
+  Chip,
   Paper,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Stack,
-  Chip,
+  Typography,
 } from '@mui/material';
 
 type Row = {
@@ -20,7 +20,7 @@ type Row = {
   overall?: number | null;
 };
 
-const rows: Row[] = [
+const rows: Array<Row> = [
   {
     student: 'Alex Johnson',
     course: 'CISC474',

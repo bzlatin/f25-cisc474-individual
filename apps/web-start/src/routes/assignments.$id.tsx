@@ -1,17 +1,8 @@
-import { Suspense } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import {
-  Stack,
-  Typography,
-  Paper,
-  Divider,
-  Button,
-  Chip,
-  Skeleton,
-  Box,
-} from '@mui/material';
-import { API_BASE } from '../lib/api';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { Box, Button, Chip, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material';
+import { Suspense } from 'react';
+import { API_BASE } from '../lib/api';
 
 type Assignment = {
   id: string;

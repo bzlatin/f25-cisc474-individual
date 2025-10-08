@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Stack, Typography, List, ListItem, ListItemText } from '@mui/material';
-import { User } from '@repo/database';
+import { createFileRoute } from '@tanstack/react-router';
 import { fetchJSON } from '../lib/api';
+import type { User } from '@repo/database';
 
 export const Route = createFileRoute('/Users')({
   component: UsersPage,
@@ -11,7 +11,7 @@ export const Route = createFileRoute('/Users')({
 function UsersPage() {
   const { data: users = [] } = useSuspenseQuery({
     queryKey: ['users'],
-    queryFn: () => fetchJSON<User[]>('/users'),
+    queryFn: () => fetchJSON<Array<User>>('/users'),
     staleTime: 60_000,
   });
 
