@@ -772,7 +772,7 @@ function IconToggleButton({
 }
 
 function getCourseLabel(course: CourseOption) {
-  return course.name ?? course.title ?? course.code ?? 'Untitled course';
+  return course.code ?? course.name ?? course.title ?? 'Untitled course';
 }
 
 function buildCreateForm(
