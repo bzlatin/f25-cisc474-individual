@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, FormEvent, SetStateAction } from 'react';
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import {
   Alert,
   Button,
@@ -91,6 +91,7 @@ function AssignmentsContent({
   onEditingChange: Dispatch<SetStateAction<string | null>>;
 }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data: assignments = [] } = useSuspenseQuery({
     queryKey: ['assignments'],
     queryFn: () => fetchJSON<Array<AssignmentOut>>('/assignments'),
@@ -111,6 +112,7 @@ function AssignmentsContent({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const editFormRef = useRef<HTMLDivElement | null>(null);
 
+  // Initialize createForm.courseId once when data arrives
   useEffect(() => {
     if (!createForm.courseId && assignments[0]?.courseId) {
       setCreateForm((prev) => ({
@@ -123,7 +125,8 @@ function AssignmentsContent({
   const editingAssignment = useMemo(
     () =>
       editingId
-        ? assignments.find((assignment) => assignment.id === editingId) ?? null
+        ? (assignments.find((assignment) => assignment.id === editingId) ??
+          null)
         : null,
     [assignments, editingId],
   );
@@ -133,9 +136,11 @@ function AssignmentsContent({
       onEditingChange(null);
       return;
     }
-    if (editingAssignment) {
-      setEditForm(buildEditForm(editingAssignment));
-    }
+    if (!editingAssignment) return;
+    setEditForm((prev) => {
+      const next = buildEditForm(editingAssignment);
+      return formsEqual(prev, next) ? prev : next;
+    });
   }, [editingAssignment, editingId, onEditingChange]);
 
   const createMutation = useMutation({
@@ -169,11 +174,13 @@ function AssignmentsContent({
     },
   });
 
+  // Only reset when showCreate flips off (avoid depending on mutation identity)
   useEffect(() => {
     if (!showCreate) {
       createMutation.reset();
     }
-  }, [showCreate, createMutation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showCreate]);
 
   const editMutation = useMutation({
     mutationFn: async ({
@@ -202,9 +209,11 @@ function AssignmentsContent({
     },
   });
 
+  // Only reset when the target being edited changes (avoid depending on mutation identity)
   useEffect(() => {
     editMutation.reset();
-  }, [editingAssignment, editMutation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingAssignment]);
 
   useEffect(() => {
     if (editingAssignment) {
@@ -443,13 +452,13 @@ function AssignmentsContent({
             </Stack>
             {editMutation.isPending && (
               <Stack spacing={1}>
-                <LinearProgress aria-label="Saving assignment changes" />
+                <LinearProgress aria-label="Saving assignment edits" />
                 <Typography
                   variant="body2"
                   color="text.secondary"
                   aria-live="polite"
                 >
-                  Saving…
+                  Saving edits…
                 </Typography>
               </Stack>
             )}
@@ -540,7 +549,7 @@ function AssignmentsContent({
               disabled={editDisabled}
               aria-label="Save assignment changes"
             >
-              {editMutation.isPending ? 'Saving…' : 'Save changes'}
+              {editMutation.isPending ? 'Saving edits…' : 'Save changes'}
             </Button>
           </Stack>
         </Paper>
@@ -604,10 +613,12 @@ function AssignmentsContent({
                   <Stack direction="row" spacing={1.5} flexWrap="wrap">
                     <Button
                       variant="contained"
-                      component={Link}
-                      to="/assignments/$id"
-                      params={{ id: assignment.id }}
-                      preload="intent"
+                      onClick={() =>
+                        navigate({
+                          to: '/assignments/$id',
+                          params: { id: assignment.id },
+                        })
+                      }
                     >
                       View details
                     </Button>
@@ -721,6 +732,17 @@ function buildEditForm(assignment: AssignmentOut | null): CreateFormState {
     dueAt: assignment?.dueAt ? toLocalInput(assignment.dueAt) : '',
     latePolicy: assignment?.latePolicy ?? '',
   };
+}
+
+function formsEqual(a: CreateFormState, b: CreateFormState) {
+  return (
+    a.courseId === b.courseId &&
+    a.title === b.title &&
+    a.description === b.description &&
+    a.points === b.points &&
+    a.dueAt === b.dueAt &&
+    a.latePolicy === b.latePolicy
+  );
 }
 
 function normalizeOptionalText(value: string) {
