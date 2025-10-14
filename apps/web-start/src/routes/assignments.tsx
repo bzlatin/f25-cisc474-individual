@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import type { Dispatch, FormEvent, SetStateAction } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import {
   Alert,
@@ -22,12 +21,13 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query';
+import { fetchJSON } from '../lib/api';
+import type { Dispatch, FormEvent, SetStateAction } from 'react';
 import type {
   AssignmentCreateIn,
   AssignmentOut,
   AssignmentUpdateIn,
 } from '@repo/api';
-import { fetchJSON } from '../lib/api';
 
 type CreateFormState = {
   courseId: string;
@@ -181,7 +181,7 @@ function AssignmentsContent({
     onSuccess: (created) => {
       queryClient.setQueryData(
         ['assignments'],
-        (previous: AssignmentOut[] | undefined) => {
+        (previous: Array<AssignmentOut> | undefined) => {
           const others = (previous ?? []).filter(
             (assignment) => assignment.id !== created.id,
           );
@@ -225,7 +225,7 @@ function AssignmentsContent({
     onSuccess: (updated) => {
       queryClient.setQueryData(
         ['assignments'],
-        (previous: AssignmentOut[] | undefined) =>
+        (previous: Array<AssignmentOut> | undefined) =>
           (previous ?? []).map((assignment) =>
             assignment.id === updated.id ? updated : assignment,
           ),
@@ -265,7 +265,7 @@ function AssignmentsContent({
     onSuccess: (deleted) => {
       queryClient.setQueryData(
         ['assignments'],
-        (previous: AssignmentOut[] | undefined) =>
+        (previous: Array<AssignmentOut> | undefined) =>
           (previous ?? []).filter((assignment) => assignment.id !== deleted.id),
       );
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
@@ -485,9 +485,7 @@ function AssignmentsContent({
                 size="small"
                 onClick={() => {
                   onEditingChange(null);
-                  if (editingAssignment) {
-                    setEditForm(buildEditForm(editingAssignment, courses));
-                  }
+                  setEditForm(buildEditForm(editingAssignment, courses));
                 }}
               >
                 Cancel
@@ -776,8 +774,8 @@ function getCourseLabel(course: CourseOption) {
 }
 
 function buildCreateForm(
-  assignments: AssignmentOut[],
-  courses: CourseOption[],
+  assignments: Array<AssignmentOut>,
+  courses: Array<CourseOption>,
 ): CreateFormState {
   const firstAssignment = assignments[0];
   return {
@@ -792,7 +790,7 @@ function buildCreateForm(
 
 function buildEditForm(
   assignment: AssignmentOut | null,
-  courses: CourseOption[],
+  courses: Array<CourseOption>,
 ): CreateFormState {
   return {
     courseId: assignment?.courseId ?? courses[0]?.id ?? '',

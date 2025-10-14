@@ -15,8 +15,10 @@
     "db:seed": "turbo run db:seed"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.4.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "eslint-plugin-react-hooks": "^7.0.0",
     "prettier": "^3.6.2",
     "prisma": "latest",
     "tsx": "4.19.1",

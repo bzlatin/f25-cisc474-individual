@@ -11,9 +11,9 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { fetchJSON } from '../lib/api';
 import type { AssignmentOut } from '@repo/api';
-import { useSuspenseQuery } from '@tanstack/react-query';
 
 const tooltipProps = {
   arrow: true,
@@ -30,7 +30,7 @@ type AssignmentsListHandlers = {
 };
 
 export type AssignmentsListViewProps = AssignmentsListHandlers & {
-  assignments: AssignmentOut[];
+  assignments: Array<AssignmentOut>;
 };
 
 export function AssignmentsListView({

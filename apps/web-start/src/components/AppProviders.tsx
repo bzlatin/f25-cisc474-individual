@@ -7,27 +7,41 @@ import TopbarRight from './dashboard/TopbarRight';
 import type { ReactNode } from 'react';
 
 export default function AppProviders({ children }: { children: ReactNode }) {
-  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  // System preference (avoid SSR mismatch)
+  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)', {
+    noSsr: true,
+  });
 
+  // User override (null = follow system). Lazy init reads once from localStorage.
+  const [overrideMode, setOverrideMode] = useState<'light' | 'dark' | null>(
+    () => {
+      if (typeof window === 'undefined') return null;
+      const saved = localStorage.getItem('mode');
+      return saved === 'light' || saved === 'dark' ? saved : null;
+    },
+  );
+
+  // Effective mode
+  const mode: 'light' | 'dark' =
+    overrideMode ?? (prefersDark ? 'dark' : 'light');
+
+  // Sync override to localStorage (effect updates external system only)
   useEffect(() => {
-    const saved =
-      typeof window !== 'undefined'
-        ? (localStorage.getItem('mode') as 'light' | 'dark' | null)
-        : null;
-    setMode(saved ?? (prefersDark ? 'dark' : 'light'));
-  }, [prefersDark]);
+    if (typeof window === 'undefined') return;
+    if (overrideMode) {
+      localStorage.setItem('mode', overrideMode);
+    } else {
+      localStorage.removeItem('mode');
+    }
+  }, [overrideMode]);
 
   const theme = useMemo(() => makeTheme(mode), [mode]);
 
   const toggleMode = () => {
-    setMode((current) => {
-      const next = current === 'light' ? 'dark' : 'light';
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('mode', next);
-      }
-      return next;
-    });
+    // If no override yet, start from current effective mode
+    const current = overrideMode ?? (prefersDark ? 'dark' : 'light');
+    const next = current === 'light' ? 'dark' : 'light';
+    setOverrideMode(next);
   };
 
   return (
