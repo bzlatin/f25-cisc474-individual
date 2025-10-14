@@ -6,6 +6,7 @@ import {
   Button,
   Chip,
   LinearProgress,
+  MenuItem,
   Paper,
   Skeleton,
   Stack,
@@ -35,6 +36,13 @@ type CreateFormState = {
   points: string;
   dueAt: string;
   latePolicy: string;
+};
+
+type CourseOption = {
+  id: string;
+  name?: string | null;
+  title?: string | null;
+  code?: string | null;
 };
 
 export const Route = createFileRoute('/assignments')({
@@ -92,6 +100,11 @@ function AssignmentsContent({
 }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { data: courses = [] } = useSuspenseQuery({
+    queryKey: ['courses'],
+    queryFn: () => fetchJSON<Array<CourseOption>>('/courses'),
+    staleTime: 60_000,
+  });
   const { data: assignments = [] } = useSuspenseQuery({
     queryKey: ['assignments'],
     queryFn: () => fetchJSON<Array<AssignmentOut>>('/assignments'),
@@ -99,28 +112,42 @@ function AssignmentsContent({
   });
 
   const [createForm, setCreateForm] = useState<CreateFormState>(() =>
-    buildCreateForm(assignments),
+    buildCreateForm(assignments, courses),
   );
   const [editForm, setEditForm] = useState<CreateFormState>(() =>
     editingId
       ? buildEditForm(
           assignments.find((assignment) => assignment.id === editingId) ?? null,
+          courses,
         )
-      : buildCreateForm(assignments),
+      : buildCreateForm(assignments, courses),
   );
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const editFormRef = useRef<HTMLDivElement | null>(null);
+  const courseNameById = useMemo(
+    () =>
+      new Map(
+        courses.map((course) => [course.id, getCourseLabel(course)] as const),
+      ),
+    [courses],
+  );
 
   // Initialize createForm.courseId once when data arrives
   useEffect(() => {
-    if (!createForm.courseId && assignments[0]?.courseId) {
-      setCreateForm((prev) => ({
+    if (!courses.length) return;
+    setCreateForm((prev) => {
+      if (
+        prev.courseId &&
+        courses.some((course) => course.id === prev.courseId)
+      )
+        return prev;
+      return {
         ...prev,
-        courseId: assignments[0]!.courseId,
-      }));
-    }
-  }, [assignments, createForm.courseId]);
+        courseId: courses[0]!.id,
+      };
+    });
+  }, [courses]);
 
   const editingAssignment = useMemo(
     () =>
@@ -138,10 +165,10 @@ function AssignmentsContent({
     }
     if (!editingAssignment) return;
     setEditForm((prev) => {
-      const next = buildEditForm(editingAssignment);
+      const next = buildEditForm(editingAssignment, courses);
       return formsEqual(prev, next) ? prev : next;
     });
-  }, [editingAssignment, editingId, onEditingChange]);
+  }, [courses, editingAssignment, editingId, onEditingChange]);
 
   const createMutation = useMutation({
     mutationFn: async (payload: AssignmentCreateIn) => {
@@ -204,7 +231,9 @@ function AssignmentsContent({
           ),
       );
       queryClient.invalidateQueries({ queryKey: ['assignments'] });
-      setEditForm(buildEditForm(updated));
+      const latestCourses =
+        queryClient.getQueryData<Array<CourseOption>>(['courses']) ?? courses;
+      setEditForm(buildEditForm(updated, latestCourses));
       onEditingChange(null);
     },
   });
@@ -325,14 +354,15 @@ function AssignmentsContent({
                 size="small"
                 onClick={() => {
                   onShowCreateChange(false);
-                  setCreateForm(buildCreateForm(assignments));
+                  setCreateForm(buildCreateForm(assignments, courses));
                 }}
               >
                 Cancel
               </Button>
             </Stack>
             <TextField
-              label="Course ID"
+              select
+              label="Course"
               value={createForm.courseId}
               onChange={(event) =>
                 setCreateForm((prev) => ({
@@ -342,7 +372,20 @@ function AssignmentsContent({
               }
               required
               fullWidth
-            />
+              disabled={!courses.length}
+            >
+              {courses.length ? (
+                courses.map((course) => (
+                  <MenuItem key={course.id} value={course.id}>
+                    {getCourseLabel(course)}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="" disabled>
+                  No courses available
+                </MenuItem>
+              )}
+            </TextField>
             <TextField
               label="Title"
               value={createForm.title}
@@ -443,7 +486,7 @@ function AssignmentsContent({
                 onClick={() => {
                   onEditingChange(null);
                   if (editingAssignment) {
-                    setEditForm(buildEditForm(editingAssignment));
+                    setEditForm(buildEditForm(editingAssignment, courses));
                   }
                 }}
               >
@@ -463,7 +506,8 @@ function AssignmentsContent({
               </Stack>
             )}
             <TextField
-              label="Course ID"
+              select
+              label="Course"
               value={editForm.courseId}
               onChange={(event) =>
                 setEditForm((prev) => ({
@@ -473,7 +517,20 @@ function AssignmentsContent({
               }
               required
               fullWidth
-            />
+              disabled={!courses.length}
+            >
+              {courses.length ? (
+                courses.map((course) => (
+                  <MenuItem key={course.id} value={course.id}>
+                    {getCourseLabel(course)}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="" disabled>
+                  No courses available
+                </MenuItem>
+              )}
+            </TextField>
             <TextField
               label="Title"
               value={editForm.title}
@@ -591,7 +648,9 @@ function AssignmentsContent({
                   Due {dueLabel} • {assignment.points} pts
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Course: {assignment.courseId}
+                  Course:{' '}
+                  {courseNameById.get(assignment.courseId) ??
+                    assignment.courseId}
                 </Typography>
 
                 {assignment.latePolicy && (
@@ -712,20 +771,31 @@ function IconToggleButton({
   );
 }
 
-function buildCreateForm(assignments: AssignmentOut[]): CreateFormState {
+function getCourseLabel(course: CourseOption) {
+  return course.name ?? course.title ?? course.code ?? 'Untitled course';
+}
+
+function buildCreateForm(
+  assignments: AssignmentOut[],
+  courses: CourseOption[],
+): CreateFormState {
+  const firstAssignment = assignments[0];
   return {
-    courseId: assignments[0]?.courseId ?? '',
+    courseId: firstAssignment?.courseId ?? courses[0]?.id ?? '',
     title: '',
     description: '',
-    points: assignments[0] ? String(assignments[0].points) : '100',
+    points: firstAssignment ? String(firstAssignment.points) : '100',
     dueAt: '',
     latePolicy: '',
   };
 }
 
-function buildEditForm(assignment: AssignmentOut | null): CreateFormState {
+function buildEditForm(
+  assignment: AssignmentOut | null,
+  courses: CourseOption[],
+): CreateFormState {
   return {
-    courseId: assignment?.courseId ?? '',
+    courseId: assignment?.courseId ?? courses[0]?.id ?? '',
     title: assignment?.title ?? '',
     description: assignment?.description ?? '',
     points: assignment ? String(assignment.points) : '100',
