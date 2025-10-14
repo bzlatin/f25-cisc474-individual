@@ -3,17 +3,9 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import { Box, Button, Chip, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material';
 import { Suspense } from 'react';
 import { API_BASE } from '../lib/api';
+import type { AssignmentOut } from '@repo/api';
 
-type Assignment = {
-  id: string;
-  courseId: string;
-  title: string;
-  description?: string | null;
-  points: number;
-  dueAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+type Assignment = AssignmentOut;
 
 export const Route = createFileRoute('/assignments/$id')({
   component: () => (
@@ -67,6 +59,14 @@ function AssignmentDetail() {
       <Typography variant="body2" color="text.secondary">
         Due {formatDate(data.dueAt)} • {data.points} pts
       </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Course: {data.courseId}
+      </Typography>
+      {data.latePolicy && (
+        <Typography variant="body2" color="text.secondary">
+          Late policy: {data.latePolicy}
+        </Typography>
+      )}
 
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="h6" gutterBottom>

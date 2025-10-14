@@ -11,16 +11,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { fetchJSON } from '../../lib/api';
+import type { AssignmentOut } from '@repo/api';
 import type { SxProps, Theme } from '@mui/material';
-
-type Assignment = {
-  id: string;
-  courseId: string;
-  title: string;
-  points: number;
-  dueAt?: string | null;
-  createdAt: string;
-};
 
 type Score = {
   id: string;
@@ -44,7 +36,7 @@ export default function RightPanel() {
 
   const { data: assignments = [] } = useSuspenseQuery({
     queryKey: ['assignments'],
-    queryFn: () => fetchJSON<Array<Assignment>>('/assignments'),
+    queryFn: () => fetchJSON<Array<AssignmentOut>>('/assignments'),
     staleTime: 60_000,
   });
 
