@@ -7,26 +7,25 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   const host = process.env.HOST || undefined;
 
-  const origins = process.env.CLIENT_ORIGINS
-    ? process.env.CLIENT_ORIGINS.split(',').map((o) => o.trim())
-    : ['http://localhost:3001', 'http://localhost:3002'];
+  const origins = (process.env.CLIENT_ORIGINS ?? '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
 
   app.enableCors({
     origin: (origin, cb) => {
-      // Allow non-browser tools (no Origin) and allowed sites
-      if (!origin || origins.includes(origin)) return cb(null, true);
+      if (!origin) return cb(null, true);
+      if (origins.includes(origin)) return cb(null, true);
+      if (/\.workers\.dev$/.test(origin)) return cb(null, true);
       return cb(new Error(`CORS blocked for origin: ${origin}`), false);
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    maxAge: 86400, // cache preflight
-  });
-
-  // (Optional) Ensure OPTIONS always succeeds quickly
-  app.use((req, res, next) => {
-    if (req.method === 'OPTIONS') return res.sendStatus(204);
-    next();
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: undefined,
+    exposedHeaders: undefined,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    maxAge: 86400,
   });
 
   await app.listen(port, host);
