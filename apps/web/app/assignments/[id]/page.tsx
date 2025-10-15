@@ -13,17 +13,9 @@ import {
   Skeleton,
   Box,
 } from '@mui/material';
+import type { AssignmentOut } from '@repo/api';
 
-type Assignment = {
-  id: string;
-  courseId: string;
-  title: string;
-  description?: string | null;
-  points: number;
-  dueAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+type Assignment = AssignmentOut;
 
 const BASE = process.env.VITE_BACKEND_URL!;
 const fetcher = async (id: string): Promise<Assignment | null> => {
@@ -89,6 +81,14 @@ export default function AssignmentDetailPage() {
       <Typography variant="body2" color="text.secondary">
         Due {formatDate(a.dueAt)} • {a.points} pts
       </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Course: {a.courseId}
+      </Typography>
+      {a.latePolicy && (
+        <Typography variant="body2" color="text.secondary">
+          Late policy: {a.latePolicy}
+        </Typography>
+      )}
 
       {/* Body */}
       <Paper variant="outlined" sx={{ p: 2 }}>

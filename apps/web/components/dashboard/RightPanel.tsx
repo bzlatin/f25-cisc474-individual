@@ -13,15 +13,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-
-type Assignment = {
-  id: string;
-  courseId: string;
-  title: string;
-  points: number;
-  dueAt?: string | null;
-  createdAt: string;
-};
+import type { AssignmentOut } from '@repo/api';
 
 type Score = {
   id: string;
@@ -54,9 +46,9 @@ const fetchJSON = <T,>(path: string) =>
 export default function RightPanel() {
   const theme = useTheme();
 
-  const { data: assignments = [] } = useSWR<Assignment[]>(
+  const { data: assignments = [] } = useSWR<AssignmentOut[]>(
     '/assignments',
-    () => fetchJSON<Assignment[]>('/assignments'),
+    () => fetchJSON<AssignmentOut[]>('/assignments'),
     { suspense: true, fallbackData: [], revalidateOnFocus: false },
   );
 

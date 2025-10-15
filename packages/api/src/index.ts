@@ -9,6 +9,7 @@ export {
   AssignmentCreateIn,
   AssignmentOut,
   AssignmentRef,
+  AssignmentIdParams,
   AssignmentUpdateIn,
   AssignmentsListFilter,
 } from './assignments';
