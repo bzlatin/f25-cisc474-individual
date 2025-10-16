@@ -11,7 +11,6 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import type { Theme } from '@mui/material';
 import type { ReactNode } from 'react';
 
 const DRAWER_WIDTH = 260;
