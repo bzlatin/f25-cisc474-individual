@@ -9,6 +9,7 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import type { Theme } from '@mui/material';
 import type { ReactNode } from 'react';
@@ -24,7 +25,8 @@ export default function DashboardShell({
   topbarRight?: ReactNode;
   children: ReactNode;
 }) {
-  const isMdUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
   const [open, setOpen] = useState(false);
 
   const drawer = (
@@ -42,14 +44,19 @@ export default function DashboardShell({
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <CssBaseline />
+      {/* Ensures first paint respects light/dark */}
+      <CssBaseline enableColorScheme />
 
       <AppBar
-        color="default"
         position="fixed"
         elevation={0}
+        // Don’t use color="default" (can flash light). Pin to theme tokens instead.
+        color="transparent"
         sx={{
-          borderBottom: (t) => `1px solid ${t.palette.divider}`,
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
           ml: { md: `${DRAWER_WIDTH}px` },
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
         }}
@@ -85,7 +92,8 @@ export default function DashboardShell({
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
               boxSizing: 'border-box',
-              borderRight: (t) => `1px solid ${t.palette.divider}`,
+              borderRight: '1px solid',
+              borderColor: 'divider',
             },
           }}
         >
