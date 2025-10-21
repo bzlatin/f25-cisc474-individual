@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as GradebookRouteImport } from './routes/gradebook'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AssignmentsRouteImport } from './routes/assignments'
@@ -20,6 +22,16 @@ import { Route as AssignmentsIdRouteImport } from './routes/assignments.$id'
 const SubmissionsRoute = SubmissionsRouteImport.update({
   id: '/submissions',
   path: '/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GradebookRoute = GradebookRouteImport.update({
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/assignments': typeof AssignmentsRouteWithChildren
   '/courses': typeof CoursesRoute
   '/gradebook': typeof GradebookRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
   '/submissions': typeof SubmissionsRoute
   '/assignments/$id': typeof AssignmentsIdRoute
 }
@@ -68,6 +82,8 @@ export interface FileRoutesByTo {
   '/assignments': typeof AssignmentsRouteWithChildren
   '/courses': typeof CoursesRoute
   '/gradebook': typeof GradebookRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
   '/submissions': typeof SubmissionsRoute
   '/assignments/$id': typeof AssignmentsIdRoute
 }
@@ -78,6 +94,8 @@ export interface FileRoutesById {
   '/assignments': typeof AssignmentsRouteWithChildren
   '/courses': typeof CoursesRoute
   '/gradebook': typeof GradebookRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
   '/submissions': typeof SubmissionsRoute
   '/assignments/$id': typeof AssignmentsIdRoute
 }
@@ -89,6 +107,8 @@ export interface FileRouteTypes {
     | '/assignments'
     | '/courses'
     | '/gradebook'
+    | '/home'
+    | '/login'
     | '/submissions'
     | '/assignments/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/assignments'
     | '/courses'
     | '/gradebook'
+    | '/home'
+    | '/login'
     | '/submissions'
     | '/assignments/$id'
   id:
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/assignments'
     | '/courses'
     | '/gradebook'
+    | '/home'
+    | '/login'
     | '/submissions'
     | '/assignments/$id'
   fileRoutesById: FileRoutesById
@@ -117,6 +141,8 @@ export interface RootRouteChildren {
   AssignmentsRoute: typeof AssignmentsRouteWithChildren
   CoursesRoute: typeof CoursesRoute
   GradebookRoute: typeof GradebookRoute
+  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute
   SubmissionsRoute: typeof SubmissionsRoute
 }
 
@@ -127,6 +153,20 @@ declare module '@tanstack/react-router' {
       path: '/submissions'
       fullPath: '/submissions'
       preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gradebook': {
@@ -192,6 +232,8 @@ const rootRouteChildren: RootRouteChildren = {
   AssignmentsRoute: AssignmentsRouteWithChildren,
   CoursesRoute: CoursesRoute,
   GradebookRoute: GradebookRoute,
+  HomeRoute: HomeRoute,
+  LoginRoute: LoginRoute,
   SubmissionsRoute: SubmissionsRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Divider,
   List,
@@ -11,6 +11,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { fetchJSON } from '../../lib/api';
+import LoginButton from '../auth/LoginButton';
+import { useAuth0 } from '@auth0/auth0-react';
 import type { AssignmentOut } from '@repo/api';
 import type { SxProps, Theme } from '@mui/material';
 
@@ -33,24 +35,40 @@ type Feedback = {
 
 export default function RightPanel() {
   const theme = useTheme();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
-  const { data: assignments = [] } = useSuspenseQuery({
+  const assignmentsQuery = useQuery({
     queryKey: ['assignments'],
     queryFn: () => fetchJSON<Array<AssignmentOut>>('/assignments'),
     staleTime: 60_000,
+    enabled: isAuthenticated,
+    retry: false,
   });
 
-  const { data: scores = [] } = useSuspenseQuery({
+  const scoresQuery = useQuery({
     queryKey: ['scores'],
     queryFn: () => fetchJSON<Array<Score>>('/scores'),
     staleTime: 60_000,
+    enabled: isAuthenticated,
+    retry: false,
   });
 
-  const { data: feedback = [] } = useSuspenseQuery({
+  const feedbackQuery = useQuery({
     queryKey: ['feedback'],
     queryFn: () => fetchJSON<Array<Feedback>>('/feedback'),
     staleTime: 60_000,
+    enabled: isAuthenticated,
+    retry: false,
   });
+
+  const isLoadingData =
+    assignmentsQuery.isPending ||
+    scoresQuery.isPending ||
+    feedbackQuery.isPending;
+
+  const assignments = assignmentsQuery.data ?? [];
+  const scores = scoresQuery.data ?? [];
+  const feedback = feedbackQuery.data ?? [];
 
   const todos = [...assignments]
     .sort(
@@ -126,26 +144,53 @@ export default function RightPanel() {
 
   return (
     <Stack spacing={2}>
-      <PanelCard
-        title="To Do"
-        items={todos}
-        cardSx={cardSx}
-        listItemSx={listItemSx}
-      />
-      <PanelCard
-        title="Recent Grades"
-        items={grades}
-        cardSx={cardSx}
-        listItemSx={listItemSx}
-        emptyLabel="No grades yet."
-      />
-      <PanelCard
-        title="Recent Feedback"
-        items={feedbackEntries}
-        cardSx={cardSx}
-        listItemSx={listItemSx}
-        emptyLabel="No feedback yet."
-      />
+      {!isAuthenticated && !authLoading && (
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Sign In
+          </Typography>
+          <Divider sx={{ my: 1 }} />
+          <LoginButton />
+        </Paper>
+      )}
+      {authLoading && (
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Checking authentication…
+          </Typography>
+        </Paper>
+      )}
+      {isAuthenticated && isLoadingData && (
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Loading dashboard data…
+          </Typography>
+        </Paper>
+      )}
+      {isAuthenticated && !isLoadingData && (
+        <>
+          <PanelCard
+            title="To Do"
+            items={todos}
+            cardSx={cardSx}
+            listItemSx={listItemSx}
+          />
+          <PanelCard
+            title="Recent Grades"
+            items={grades}
+            cardSx={cardSx}
+            listItemSx={listItemSx}
+            emptyLabel="No grades yet."
+          />
+          <PanelCard
+            title="Recent Feedback"
+            items={feedbackEntries}
+            cardSx={cardSx}
+            listItemSx={listItemSx}
+            emptyLabel="No feedback yet."
+          />
+        </>
+      )}
     </Stack>
   );
 }
