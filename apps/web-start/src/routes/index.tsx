@@ -1,84 +1,19 @@
-import { Suspense } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
-import CoursesList from '../components/CoursesList';
-import RightPanel from '../components/dashboard/RightPanel';
+import { useEffect } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export const Route = createFileRoute('/')({
-  component: DashboardPage,
+  component: RootRedirect,
 });
 
-function CoursesFallback() {
-  return (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          sm: '1fr 1fr',
-          lg: '1fr 1fr 1fr',
-        },
-        gap: 2,
-      }}
-    >
-      {[...Array(3)].map((_, i) => (
-        <Skeleton
-          key={i}
-          variant="rounded"
-          height={120}
-          sx={{ borderRadius: 1 }}
-        />
-      ))}
-    </Box>
-  );
-}
+function RootRedirect() {
+  const { isAuthenticated, isLoading } = useAuth0();
+  const navigate = useNavigate();
 
-function DashboardPage() {
-  return (
-    <Stack spacing={2}>
-      <Typography variant="h4" component="h1">
-        Dashboard
-      </Typography>
+  useEffect(() => {
+    if (isLoading) return;
+    navigate({ to: isAuthenticated ? '/home' : '/login', replace: true });
+  }, [isLoading, isAuthenticated, navigate]);
 
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
-        <Box sx={{ flex: 1 }}>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: '1fr 1fr',
-                lg: '1fr 1fr 1fr',
-              },
-              gap: 2,
-            }}
-          >
-            <Suspense fallback={<CoursesFallback />}>
-              <CoursesList />
-            </Suspense>
-          </Box>
-        </Box>
-
-        <Divider
-          orientation="vertical"
-          flexItem
-          sx={{ display: { xs: 'none', md: 'block' } }}
-        />
-
-        <Box
-          sx={{
-            width: { xs: '100%', md: 320 },
-            position: { md: 'sticky' },
-            top: { md: 24 },
-            alignSelf: 'flex-start',
-            pl: { md: 2 },
-          }}
-        >
-          <Suspense fallback={<div />}>
-            <RightPanel />
-          </Suspense>
-        </Box>
-      </Box>
-    </Stack>
-  );
+  return null;
 }

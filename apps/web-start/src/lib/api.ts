@@ -1,4 +1,5 @@
 export const API_BASE = import.meta.env.VITE_BACKEND_URL ?? '';
+import { getAccessToken } from '../integrations/auth0';
 
 export async function fetchJSON<T>(
   path: string,
@@ -9,8 +10,12 @@ export async function fetchJSON<T>(
       'Missing VITE_BACKEND_URL. Add it to apps/web-start/.env or the repo root so the frontend can reach the API.',
     );
   }
+  const headers = new Headers({ Accept: 'application/json' });
+  const token = await getAccessToken();
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { Accept: 'application/json' },
+    headers,
     ...init,
   });
 
